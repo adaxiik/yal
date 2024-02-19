@@ -6,9 +6,12 @@ from parser_combinators import ApplyParser, Parser
 
 class TokenKind(Enum):
     NUMBER = 0
-    OP     = 1
-    LPAREN = 2
-    RPAREN = 3
+    LPAREN = 1
+    RPAREN = 2
+    PLUS   = 3
+    MINUS  = 4
+    MUL    = 5
+    DIV    = 6
 
 @dataclass
 class Token():
@@ -44,7 +47,16 @@ def tokenize(input_str: str) -> Optional[list[Token]]:
         if apply(ApplyParser.rparen, TokenKind.RPAREN):
             continue
 
-        if apply(ApplyParser.op, TokenKind.OP):
+        if apply(ApplyParser.plus, TokenKind.PLUS):
+            continue
+
+        if apply(ApplyParser.minus, TokenKind.MINUS):
+            continue
+
+        if apply(ApplyParser.mul, TokenKind.MUL):
+            continue
+
+        if apply(ApplyParser.div, TokenKind.DIV):
             continue
 
         return None

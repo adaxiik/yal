@@ -103,11 +103,17 @@ class ApplyParser:
     uint = ParseCombinator.create_repeat_parser(digit, min_count=1)
     lparen = ParseCombinator.create_char_parser('(')
     rparen = ParseCombinator.create_char_parser(')')
-    op =  ParseCombinator.create_alternative_parser(
-        [
-            ParseCombinator.create_char_parser('+'),
-            ParseCombinator.create_char_parser('-'),
-            ParseCombinator.create_char_parser('*'),
-            ParseCombinator.create_char_parser('/')
-        ]
-    )
+
+    # op =  ParseCombinator.create_alternative_parser(
+    #     [
+    #         ParseCombinator.create_char_parser('+'),
+    #         ParseCombinator.create_char_parser('-'),
+    #         ParseCombinator.create_char_parser('*'),
+    #         ParseCombinator.create_char_parser('/')
+    #     ]
+    # )
+
+    plus = ParseCombinator.create_char_parser('+')
+    minus = ParseCombinator.create_char_parser('-')
+    mul = ParseCombinator.create_char_parser('*')
+    div = ParseCombinator.create_char_parser('/')
