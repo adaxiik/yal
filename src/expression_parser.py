@@ -55,6 +55,8 @@ def parse_plus_minus(data: ParserData) ->Optional[Expression]:
         op = OpKind.ADD if data.peek.token_kind == TokenKind.PLUS else OpKind.SUB
         data.consume()
         right = parse_mul_div(data)
+        if right is None or left is None:
+            return None
         left = BinaryExpression(left, right, op)
     return left
 
@@ -64,6 +66,8 @@ def parse_mul_div(data: ParserData) ->Optional[Expression]:
         op = OpKind.MUL if data.peek.token_kind == TokenKind.MUL else OpKind.DIV
         data.consume()
         right = parse_number(data)
+        if right is None or left is None:
+            return None
         left = BinaryExpression(left, right, op)
     return left
 
