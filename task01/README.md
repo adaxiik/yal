@@ -1,5 +1,4 @@
-# yal
-Yet another language
+# task01
 
 ## lexer
 - for tokenizer it currently uses my parser combinators from [rampy](https://github.com/adaxiik/rampy/blob/main/src/parser_combinators.py)

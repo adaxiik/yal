@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from parser_combinators import ApplyParser
 from expression_lexer import Token, TokenKind
 
+
 class OpKind(Enum):
     ADD = '+'
     SUB = '-'
@@ -11,18 +12,20 @@ class OpKind(Enum):
     DIV = '/'
 
 
-
 Expression = Union["NumberExpression", "BinaryExpression"]
+
 
 @dataclass
 class NumberExpression():
     value: int
+
 
 @dataclass
 class BinaryExpression():
     left: Expression
     right: Expression
     op: OpKind
+
 
 class ParserData():
     def __init__(self, tokens) -> None:
@@ -46,10 +49,12 @@ class ParserData():
     def consume(self):
         self.index += 1
 
-def parse(tokens: list[Token]) ->Optional[Expression]:
+
+def parse(tokens: list[Token]) -> Optional[Expression]:
     return parse_plus_minus(ParserData(tokens))
 
-def parse_plus_minus(data: ParserData) ->Optional[Expression]:
+
+def parse_plus_minus(data: ParserData) -> Optional[Expression]:
     left = parse_mul_div(data)
     while data.check_next(TokenKind.PLUS) or data.check_next(TokenKind.MINUS):
         op = OpKind.ADD if data.peek.token_kind == TokenKind.PLUS else OpKind.SUB
@@ -60,7 +65,8 @@ def parse_plus_minus(data: ParserData) ->Optional[Expression]:
         left = BinaryExpression(left, right, op)
     return left
 
-def parse_mul_div(data: ParserData) ->Optional[Expression]:
+
+def parse_mul_div(data: ParserData) -> Optional[Expression]:
     left = parse_number(data)
     while data.check_next(TokenKind.MUL) or data.check_next(TokenKind.DIV):
         op = OpKind.MUL if data.peek.token_kind == TokenKind.MUL else OpKind.DIV
@@ -71,7 +77,8 @@ def parse_mul_div(data: ParserData) ->Optional[Expression]:
         left = BinaryExpression(left, right, op)
     return left
 
-def parse_number(data: ParserData) ->Optional[Expression]:
+
+def parse_number(data: ParserData) -> Optional[Expression]:
     if data.check_next(TokenKind.NUMBER):
         value = int(data.peek.value)
         data.consume()
