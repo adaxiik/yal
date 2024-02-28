@@ -7,7 +7,10 @@ class Epsilon():
         return isinstance(o, Epsilon)
 
     def __repr__(self) -> str:
-        return "{e}"
+        return '{e}'
+
+    def __hash__(self) -> int:
+        return hash('e')
 
 class Symbol():
     def __init__(self, name: Union[str, Epsilon]) -> None:
@@ -21,7 +24,7 @@ class Symbol():
         return self.name == o.name
 
     def __repr__(self) -> str:
-        return self.name
+        return str(self.name)
 
     def __hash__(self) -> int:
         return hash(self.name)
@@ -32,13 +35,13 @@ class Terminal(Symbol):
 
 class NonTerminal(Symbol):
 
-    def __init__(self, name: str, rules: List["Rule"]) -> None:
+    def __init__(self, name: str, rules: List['Rule']) -> None:
         super().__init__(name)
-        self.rules: List["Rule"] = rules
+        self.rules: List['Rule'] = rules
 
-    def add_rule(self, rule: "Rule") -> "Rule":
+    def add_rule(self, rule: 'Rule') -> 'Rule':
         self.rules.append(rule)
         return rule
 
     def __repr__(self) -> str:
-        return f"{self.name} : " + " | ".join([str(x) for x in self.rules])
+        return f'{self.name}'

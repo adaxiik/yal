@@ -1,5 +1,6 @@
 
-from typing import Dict, List, Optional, Set
+from collections import defaultdict
+from typing import Dict, List, Optional, Set, Tuple
 from grammar_symbol import NonTerminal, Symbol, Terminal
 
 
@@ -44,6 +45,8 @@ class GrammarOps():
     def __init__(self, grammar: Grammar) -> None:
         self.grammar: Grammar = grammar
         self._empty_nonterminals: Set[NonTerminal] = GrammarOps.calculate_empty_nonterminals(self.grammar)
+        self._first_set = GrammarOps.calculate_first_set(self.grammar, self._empty_nonterminals)
+        # self._follow_set = GrammarOps.calculate_follow_set(self.grammar, self._first_set, self._empty_nonterminals)
 
     @staticmethod
     def calculate_empty_nonterminals(grammar: Grammar) -> Set[NonTerminal]:
@@ -68,3 +71,29 @@ class GrammarOps():
     def empty_nonterminals(self):
         return self._empty_nonterminals
 
+    @staticmethod
+    def calculate_first_set(grammar: Grammar, empty_nonterminals: Set[NonTerminal]) -> Dict[Symbol, Set[Symbol]]:
+        result: Dict[Symbol, Set[Symbol]] = {x: set() for x in grammar.nonterminals}
+        last_size = -1
+        while last_size != sum([len(x) for x in result.values()]):
+            last_size = sum([len(x) for x in result.values()])
+            # for terminal in grammar.terminals:
+            #     result[terminal].add(terminal)
+            for nonterminal in grammar.nonterminals:
+                for rule in nonterminal.rules:
+                    for symbol in rule.symbols:
+                        if isinstance(symbol, Terminal):
+                            result[nonterminal].add(symbol)
+                            break
+                        result[nonterminal] = result[nonterminal].union(result[symbol])
+                        if not symbol in empty_nonterminals:
+                            break
+        return result
+
+    @property
+    def first_set(self):
+        return self._first_set
+
+    @property
+    def first_set_by_rule(self):
+        return self._first_set_by_rule
