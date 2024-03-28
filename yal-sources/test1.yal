@@ -1,1 +1,9 @@
-int true;
+int x;
+1;
+6.9;
+"str";
+true;
+if (true) {} else {}
+false;
+false;
+;
