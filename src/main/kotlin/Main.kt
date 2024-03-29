@@ -13,12 +13,12 @@ fun main(args: Array<String>) {
     val parser = YALParser(tokens)
 
     parser.addErrorListener(ErrorListener())
+    val tree = parser.program()
 
     if (parser.numberOfSyntaxErrors != 0) {
         exitProcess(1)
     }
 
-    val tree = parser.program()
     val program = Binder().visit(tree) as BoundBlockStatement
     program.statements.forEach(::println)
 }

@@ -14,7 +14,7 @@ grammar YAL;
 
 
 
-program : statement*;
+program : statement* EOF;
 
 //statement : typeSpecifier BoolLiteral?;
 statement : declarationStatement
@@ -24,6 +24,7 @@ statement : declarationStatement
           | whileStatement
           | ifStatement
           | emptyStatement
+          | readStatement
           ;
 
 
@@ -34,11 +35,37 @@ writeStatement : 'write' expression (',' expression)* ';' ;
 expressionStatement : expression ';' ;
 whileStatement : 'while' '(' expression ')' statement ;
 ifStatement : 'if' '(' expression ')' statement ('else' statement)? ;
+readStatement : 'read' Identificator (',' Identificator)* ';' ;
 
-// todo: jen promenne
-// readStatement : 'read' expression (',' expression)*;
+expression : op=Sub expression                                #unaryMinus
+           | op=Not expression                                #unaryNot
+           | expression op=(Mul|Div|Mod) expression           #binaryMulDivMod
+           | expression op=(Add|Sub|Concat) expression        #binaryAddSub
+           | expression op=(Lt|Gt) expression                 #binaryLtGt
+           | expression op=(Eq|NotEq) expression              #binaryEqNotEq
+           | expression op=And expression                     #binaryAnd
+           | expression op=Or expression                      #binaryOr
+           | literalExpression                                #literalExpressionInExpression
+           | Identificator                                    #identifierExpression
+           | '(' expression ')'                               #parenthesized
+           | <assoc=right> Identificator op=Assign expression #assign
+           ;
 
-expression : literalExpression ;
+Assign : '=' ;
+Add    : '+' ;
+Sub    : '-' ;
+Mul    : '*' ;
+Div    : '/' ;
+Mod    : '%' ;
+Not    : '!' ;
+Eq     : '==' ;
+NotEq  : '!=' ;
+Or     : '||' ;
+And    : '&&' ;
+Concat : '.' ;
+Lt     : '<' ;
+Gt     : '>' ;
+
 
 literalExpression : StringLiteral
                   | FloatLiteral
@@ -60,19 +87,21 @@ StringLiteral: '"' StringCharacters? '"' ;
 fragment StringCharacters: StringCharacter+ ;
 fragment StringCharacter: ~["\\\r\n] ;
 
-FloatLiteral : Digits '.' Digits? ;
+FloatLiteral : Digits '.' Digits+ ;
 fragment Digits: [0-9] ;
 
 BoolLiteral : 'true' | 'false' ;
 
 IntLiteral : NegativeIntLiteral | PositiveIntLiteral ;
 fragment NegativeIntLiteral : '-' PositiveIntLiteral ;
-fragment PositiveIntLiteral : [1-9][0-9]* ;
+fragment PositiveIntLiteral : [1-9][0-9]* | [0-9];
 
 Whitespace: [ \t]+ -> channel(HIDDEN) ;
 
 Newline : ('\r' '\n'? | '\n') -> channel(HIDDEN) ;
 Identificator : [a-zA-Z]+[a-zA-Z0-9]* ;
+
+LineComment : '//' ~[\r\n]* -> channel(HIDDEN) ;
 
 //
 //
