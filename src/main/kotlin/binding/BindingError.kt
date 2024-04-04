@@ -1,7 +1,11 @@
 package binding
 import Type
 
-abstract class BindingError(val position: SourcePosition) : Exception()
+abstract class BindingError(val position: SourcePosition) : Exception() {
+    override fun toString(): String {
+        return "${super.toString()} $position"
+    }
+}
 
 class Unreachable(position: SourcePosition) : BindingError(position) {
     override fun toString(): String = "Unreachable($position.toString())"

@@ -28,6 +28,7 @@ class Binder(
     )
 
     private val variables = mutableMapOf<String, Type>()
+    public val errors = mutableListOf<BindingError>()
 
     private val Token.position get() = SourcePosition(line, charPositionInLine)
     private val TerminalNode.position get() = symbol.position
@@ -41,7 +42,17 @@ class Binder(
     }
 
     override fun visitProgram(ctx: YALParser.ProgramContext) = BoundBlockStatement(
-        ctx.statement().mapNotNull(::visitStatement)
+        ctx
+            .statement()
+            .mapNotNull{
+                try {
+                    visitStatement(it)
+                }
+                catch (e: BindingError){
+                    errors.add(e)
+                    null
+                }
+            }
     )
 
     override fun visitStatement(ctx: YALParser.StatementContext): BoundStatement = when {
@@ -87,11 +98,11 @@ class Binder(
     )
 
     private fun TerminalNode.toType(): Type = when (text) {
-        "float" -> Type.Float
+        "float"  -> Type.Float
         "string" -> Type.String
-        "bool" -> Type.Bool
-        "int" -> Type.Int
-        else -> throw Unreachable(SourcePosition(0, 0))
+        "bool"   -> Type.Bool
+        "int"    -> Type.Int
+        else     -> throw Unreachable(SourcePosition(0, 0))
     }
 
     override fun visitDeclarationStatement(ctx: YALParser.DeclarationStatementContext) = BoundDeclarationStatement(
@@ -111,9 +122,9 @@ class Binder(
     )
 
     override fun visitLiteralExpression(ctx: YALParser.LiteralExpressionContext) = when {
-        ctx.BoolLiteral() != null -> BoundLiteralExpression.BoolLiteral(ctx.BoolLiteral().text == "true")
-        ctx.FloatLiteral() != null -> BoundLiteralExpression.FloatLiteral(ctx.FloatLiteral().text.toFloat())
-        ctx.IntLiteral() != null -> BoundLiteralExpression.IntLiteral(ctx.IntLiteral().text.toInt())
+        ctx.BoolLiteral()   != null -> BoundLiteralExpression.BoolLiteral(ctx.BoolLiteral().text == "true")
+        ctx.FloatLiteral()  != null -> BoundLiteralExpression.FloatLiteral(ctx.FloatLiteral().text.toFloat())
+        ctx.IntLiteral()    != null -> BoundLiteralExpression.IntLiteral(ctx.IntLiteral().text.toInt())
         ctx.StringLiteral() != null -> BoundLiteralExpression.StringLiteral(ctx.StringLiteral().text)
         else -> throw Unreachable(ctx.position)
     }
@@ -148,7 +159,7 @@ class Binder(
         BoundAssignOperator(
             variableType,
             it,
-            visitExpression(ctx.expression()).let {expr ->
+            visitExpression(ctx.expression()).let { expr ->
                 when {
                     expr.type == variableType -> expr
                     expr.type == Type.Int && variableType == Type.Float -> expr
@@ -202,19 +213,19 @@ class Binder(
     )
     private fun visitExpression(ctx: YALParser.ExpressionContext): BoundExpression = try {
         when (ctx) {
-            is YALParser.BinaryAddSubContext -> visitBinaryAddSub(ctx)
-            is YALParser.BinaryMulDivModContext -> visitBinaryMulDivMod(ctx)
+            is YALParser.BinaryAddSubContext                  -> visitBinaryAddSub(ctx)
+            is YALParser.BinaryMulDivModContext               -> visitBinaryMulDivMod(ctx)
             is YALParser.LiteralExpressionInExpressionContext -> visitLiteralExpression(ctx.literalExpression())
-            is YALParser.IdentifierExpressionContext -> visitIdentifierExpression(ctx)
-            is YALParser.UnaryMinusContext -> visitUnaryMinus(ctx)
-            is YALParser.UnaryNotContext -> visitUnaryNot(ctx)
-            is YALParser.BinaryAndContext -> visitBinaryAnd(ctx)
-            is YALParser.BinaryOrContext -> visitBinaryOr(ctx)
-            is YALParser.BinaryEqNotEqContext -> visitBinaryEqNotEq(ctx)
-            is YALParser.BinaryLtGtContext -> visitBinaryLtGt(ctx)
-            is YALParser.AssignContext -> visitAssign(ctx)
-            is YALParser.ParenthesizedContext -> visitParenthesized(ctx)
-            else -> throw Unreachable(ctx.position)
+            is YALParser.IdentifierExpressionContext          -> visitIdentifierExpression(ctx)
+            is YALParser.UnaryMinusContext                    -> visitUnaryMinus(ctx)
+            is YALParser.UnaryNotContext                      -> visitUnaryNot(ctx)
+            is YALParser.BinaryAndContext                     -> visitBinaryAnd(ctx)
+            is YALParser.BinaryOrContext                      -> visitBinaryOr(ctx)
+            is YALParser.BinaryEqNotEqContext                 -> visitBinaryEqNotEq(ctx)
+            is YALParser.BinaryLtGtContext                    -> visitBinaryLtGt(ctx)
+            is YALParser.AssignContext                        -> visitAssign(ctx)
+            is YALParser.ParenthesizedContext                 -> visitParenthesized(ctx)
+            else                                              -> throw Unreachable(ctx.position)
         }
     } catch (deductionError: InvalidBinaryDeduction) {
         throw InvalidBinaryOperatorTypes(

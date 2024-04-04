@@ -7,7 +7,12 @@ import kotlin.system.exitProcess
 
 
 fun main(args: Array<String>) {
-    val inputStream = CharStreams.fromFileName("yal-sources/test1.yal")
+    val inputStream = try {
+        CharStreams.fromFileName("yal-sources/test1.yal")
+    } catch (e: Exception) {
+        println(e)
+        exitProcess(1)
+    }
     val lexer = YALLexer(inputStream)
     val tokens = CommonTokenStream(lexer)
     val parser = YALParser(tokens)
@@ -19,6 +24,11 @@ fun main(args: Array<String>) {
         exitProcess(1)
     }
 
-    val program = Binder().visit(tree) as BoundBlockStatement
-    program.statements.forEach(::println)
+    val binder = Binder()
+    val program = binder.visit(tree) as BoundBlockStatement
+    when (binder.errors.size) {
+        0 -> program.statements.forEach(::println)
+        else -> binder.errors.forEach(::println)
+    }
+
 }
