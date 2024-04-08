@@ -8,7 +8,7 @@ import kotlin.system.exitProcess
 
 fun main(args: Array<String>) {
     val inputStream = try {
-        CharStreams.fromFileName("yal-sources/test1.yal")
+        CharStreams.fromFileName("yal-sources/PLC_errors.in")
     } catch (e: Exception) {
         println(e)
         exitProcess(1)
