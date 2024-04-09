@@ -19,10 +19,10 @@ enum class BinaryOperationKind {
 
 class InvalidBinaryDeduction(val left: Type, val right: Type, val op: BinaryOperationKind) : Exception()
 
-class BoundBinaryOperation(
-    left: BoundExpression,
-    right: BoundExpression,
-    kind: BinaryOperationKind
+class BoundBinaryExpression(
+    val left: BoundExpression,
+    val right: BoundExpression,
+    val kind: BinaryOperationKind
 ) : BoundExpression(deduceType(left.type, right.type, kind)) {
     companion object {
 

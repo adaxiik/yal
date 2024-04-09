@@ -55,6 +55,10 @@ class Binder(
             }
     )
 
+//    override fun visitDoStatement(ctx: YALParser.DoStatementContext): BoundDoStatement = BoundDoStatement(
+//        visitExpression(ctx.expression()).mustBe(Type.Bool) ?: throw UnexpectedType(ctx.position, Type.Bool),
+//        visitStatement(ctx.statement())
+//    )
     override fun visitStatement(ctx: YALParser.StatementContext): BoundStatement = when {
         ctx.blockStatement()       != null -> visitBlockStatement(ctx.blockStatement())
         ctx.declarationStatement() != null -> visitDeclarationStatement(ctx.declarationStatement())
@@ -64,6 +68,7 @@ class Binder(
         ctx.whileStatement()       != null -> visitWhileStatement(ctx.whileStatement())
         ctx.readStatement()        != null -> visitReadStatement(ctx.readStatement())
         ctx.emptyStatement()       != null -> BoundEmptyStatement()
+//        ctx.doStatement()          != null -> visitDoStatement(ctx.doStatement())
         else -> throw Unreachable(ctx.position)
     }
 
@@ -125,11 +130,11 @@ class Binder(
         ctx.BoolLiteral()   != null -> BoundLiteralExpression.BoolLiteral(ctx.BoolLiteral().text == "true")
         ctx.FloatLiteral()  != null -> BoundLiteralExpression.FloatLiteral(ctx.FloatLiteral().text.toFloat())
         ctx.IntLiteral()    != null -> BoundLiteralExpression.IntLiteral(ctx.IntLiteral().text.toInt())
-        ctx.StringLiteral() != null -> BoundLiteralExpression.StringLiteral(ctx.StringLiteral().text)
+        ctx.StringLiteral() != null -> BoundLiteralExpression.StringLiteral(ctx.StringLiteral().text.drop(1).dropLast(1))
         else -> throw Unreachable(ctx.position)
     }
 
-    override fun visitBinaryAddSub(ctx: YALParser.BinaryAddSubContext) = BoundBinaryOperation(
+    override fun visitBinaryAddSub(ctx: YALParser.BinaryAddSubContext) = BoundBinaryExpression(
         visitExpression(ctx.expression(0)),
         visitExpression(ctx.expression(1)),
         when (ctx.op.text) {
@@ -140,7 +145,7 @@ class Binder(
         }
     )
 
-    override fun visitBinaryMulDivMod(ctx: YALParser.BinaryMulDivModContext) = BoundBinaryOperation(
+    override fun visitBinaryMulDivMod(ctx: YALParser.BinaryMulDivModContext) = BoundBinaryExpression(
         visitExpression(ctx.expression(0)),
         visitExpression(ctx.expression(1)),
         when (ctx.op.text) {
@@ -156,7 +161,7 @@ class Binder(
 
     override fun visitAssign(ctx: YALParser.AssignContext) = ctx.Identificator().text.let {
         val variableType = variables[it] ?: throw VariableDoesNotExist(ctx.position, it)
-        BoundAssignOperator(
+        BoundAssignmentExpression(
             variableType,
             it,
             visitExpression(ctx.expression()).let { expr ->
@@ -170,19 +175,19 @@ class Binder(
     }
     override fun visitParenthesized(ctx: YALParser.ParenthesizedContext) = visitExpression(ctx.expression())
 
-    override fun visitBinaryAnd(ctx: YALParser.BinaryAndContext) = BoundBinaryOperation(
+    override fun visitBinaryAnd(ctx: YALParser.BinaryAndContext) = BoundBinaryExpression(
         visitExpression(ctx.expression(0)),
         visitExpression(ctx.expression(1)),
         BinaryOperationKind.And
     )
 
-    override fun visitBinaryOr(ctx: YALParser.BinaryOrContext) = BoundBinaryOperation(
+    override fun visitBinaryOr(ctx: YALParser.BinaryOrContext) = BoundBinaryExpression(
         visitExpression(ctx.expression(0)),
         visitExpression(ctx.expression(1)),
         BinaryOperationKind.Or
     )
 
-    override fun visitBinaryLtGt(ctx: YALParser.BinaryLtGtContext) = BoundBinaryOperation(
+    override fun visitBinaryLtGt(ctx: YALParser.BinaryLtGtContext) = BoundBinaryExpression(
         visitExpression(ctx.expression(0)),
         visitExpression(ctx.expression(1)),
         when (ctx.op.text) {
@@ -192,7 +197,7 @@ class Binder(
         }
     )
 
-    override fun visitBinaryEqNotEq(ctx: YALParser.BinaryEqNotEqContext) = BoundBinaryOperation(
+    override fun visitBinaryEqNotEq(ctx: YALParser.BinaryEqNotEqContext) = BoundBinaryExpression(
         visitExpression(ctx.expression(0)),
         visitExpression(ctx.expression(1)),
         when (ctx.op.text) {
@@ -263,11 +268,10 @@ class Binder(
     override fun visitReadStatement(ctx: YALParser.ReadStatementContext) = BoundReadStatement(
         ctx.Identificator()
             .map { it.text }
-            .map {
-                when(it) {
-                    !in variables -> throw VariableDoesNotExist(ctx.position, it)
-                    else -> it
-                }
+            .map {name ->
+                variables[name]?.let {
+                    type -> ReadToIdentifier(type, name)
+                } ?: throw VariableDoesNotExist(ctx.position, name)
             }
     )
 

@@ -25,6 +25,7 @@ statement : declarationStatement
           | ifStatement
           | emptyStatement
           | readStatement
+//          | doStatement
           ;
 
 
@@ -36,6 +37,8 @@ expressionStatement : expression ';' ;
 whileStatement : 'while' '(' expression ')' statement ;
 ifStatement : 'if' '(' expression ')' statement ('else' statement)? ;
 readStatement : 'read' Identificator (',' Identificator)* ';' ;
+//doStatement : 'do' statement 'while' '(' expression ')' ;
+
 
 expression : op=Sub expression                                #unaryMinus
            | op=Not expression                                #unaryNot

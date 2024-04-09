@@ -1,4 +1,4 @@
 package binding
 
-class BoundWhileStatement(val condition: BoundExpression, body: BoundStatement) : BoundStatement() {
+class BoundWhileStatement(val condition: BoundExpression, val body: BoundStatement) : BoundStatement() {
 }

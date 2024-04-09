@@ -1,21 +1,24 @@
-write "<Testing errors>";
+if (3<4) write "condition was true";
+else write "condition was false";
 
-write "4) mod used with float";
-write "20 mod 3.0: ", 20 % 3.0;
+if (true) {
+	write "inside";
+	write "second";
+	write "if";
+}
 
-write "8) assignment of float to int";
-int x;
-x = 13.25;
-write "x=13.25: ", x;
+int a,b;
 
-write "12) . only for strings";
-write "abc+10: ", "abc". 10;
+while(a<10) {
+ write "a=",a;
+ a=a+1;
+}
 
-write "15) multiple declarations";
-float x;
+a=0;
 
-write "18) missing declaration";
-y = 10;
+read b;
 
-write "21) + wont work with strings";
-write "x+y", "x"+"y";
+while(a<b) {
+ write "a=",a,", b=",b;
+ a=a+1;
+}

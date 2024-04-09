@@ -9,8 +9,8 @@ enum class UnaryOperationKind {
 class InvalidUnaryDeduction(val exprType: Type, val op: UnaryOperationKind) : Exception()
 
 class BoundUnaryExpression(
-    expression: BoundExpression,
-    operationKind: UnaryOperationKind
+    val expression: BoundExpression,
+    val operationKind: UnaryOperationKind
 ) : BoundExpression(deduceType(expression.type, operationKind)) {
 
     companion object {
