@@ -43,11 +43,20 @@ class Lowerer {
 
     private fun lower(node: BoundIdentifierExpression) = listOf(LoadInstruction(node.name))
 
+    private fun shouldCastToFloat(targetType: Type, left: Type, right: Type, lookingOnRight: Boolean) = when (targetType) {
+        Type.Float -> left != Type.Float && !lookingOnRight || right != Type.Float && lookingOnRight
+        Type.Bool -> when (left) {
+            Type.Float -> right == Type.Int && lookingOnRight
+            Type.Int -> right == Type.Float && !lookingOnRight
+            else -> false
+        }
+        else -> false
+    }
     private fun lower(node: BoundBinaryExpression) =
         lower(node.right) +
-        ( if (node.type == Type.Float && node.right.type != Type.Float) listOf(IntToFloatInstruction()) else emptyList<Instruction>()) +
+        ( if (shouldCastToFloat(node.type, node.left.type, node.right.type, true)) listOf(IntToFloatInstruction()) else emptyList<Instruction>()) +
         lower(node.left) +
-        ( if (node.type == Type.Float && node.left.type != Type.Float) listOf(IntToFloatInstruction()) else emptyList<Instruction>()) +
+        ( if (shouldCastToFloat(node.type, node.left.type, node.right.type, false)) listOf(IntToFloatInstruction()) else emptyList<Instruction>()) +
         when (node.kind) {
             BinaryOperationKind.Add    -> listOf(AddInstruction())
             BinaryOperationKind.Sub    -> listOf(SubInstruction())
@@ -72,7 +81,7 @@ class Lowerer {
         listOf(
             when (node.type) {
                 Type.Int -> PushInstruction(Type.Int, 0)
-                Type.Float -> PushInstruction(Type.Float, 0.0)
+                Type.Float -> PushInstruction(Type.Float, 0.0f)
                 Type.String -> PushInstruction(Type.String, String())
                 Type.Bool -> PushInstruction(Type.Bool, false)
             },

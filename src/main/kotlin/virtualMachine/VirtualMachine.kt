@@ -130,7 +130,7 @@ class VirtualMachine(private val instructions: List<Instruction>) {
 
     private fun interpret(ins: NotInstruction) : Unit = valueStack.push(!(valueStack.pop() as Boolean)).unit
 
-    private fun interpret(ins: IntToFloatInstruction) : Unit = valueStack.push(valueStack.pop() as Float).unit
+    private fun interpret(ins: IntToFloatInstruction) : Unit = valueStack.push((valueStack.pop() as Int).toFloat()).unit
 
     private fun interpret(ins: PopInstruction) : Unit = valueStack.pop().unit
 
