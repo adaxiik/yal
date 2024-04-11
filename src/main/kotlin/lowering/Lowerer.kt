@@ -12,6 +12,12 @@ class Lowerer {
 
     private fun createLabel() = currentLabel++
 
+    // list concatenation isn't probably the best idea.. some instruction buffer would be better I guess
+    // but I dont really care for these smoll programs
+
+    private fun List<Instruction>.add(instructions: List<Instruction>) = this + instructions
+    private fun List<Instruction>.add(instruction: Instruction) = this + instruction
+
     private fun lower(node: BoundLiteralExpression) = listOf(
         when (node) {
             is BoundLiteralExpression.IntLiteral    -> PushInstruction(Type.Int, node.value)
@@ -27,11 +33,10 @@ class Lowerer {
         UnaryOperationKind.Minus -> UnaryMinusInstruction()
     }
 
-    private fun lower(node: BoundAssignmentExpression) =
-        lower(node.expression) +
-        ( if (node.type == Type.Float && node.expression.type != Type.Float) listOf(IntToFloatInstruction()) else emptyList<Instruction>()) +
-        SaveInstruction(node.name) +
-        LoadInstruction(node.name)
+    private fun lower(node: BoundAssignmentExpression) = lower(node.expression)
+        .add(if (node.type == Type.Float && node.expression.type != Type.Float) listOf(IntToFloatInstruction()) else emptyList<Instruction>())
+        .add(SaveInstruction(node.name))
+        .add(LoadInstruction(node.name))
 
     private fun lower(node: BoundExpression) : List<Instruction> = when (node) {
         is BoundLiteralExpression    -> lower(node)
@@ -53,30 +58,41 @@ class Lowerer {
         }
         else -> false
     }
-    private fun lower(node: BoundBinaryExpression) =
-        lower(node.left) +
-        ( if (shouldCastToFloat(node.type, node.left.type, node.right.type, false)) listOf(IntToFloatInstruction()) else emptyList<Instruction>()) +
-        lower(node.right) +
-        ( if (shouldCastToFloat(node.type, node.left.type, node.right.type, true)) listOf(IntToFloatInstruction()) else emptyList<Instruction>()) +
-        when (node.kind) {
-            BinaryOperationKind.Add    -> listOf(AddInstruction())
-            BinaryOperationKind.Sub    -> listOf(SubInstruction())
-            BinaryOperationKind.Mul    -> listOf(MulInstruction())
-            BinaryOperationKind.Div    -> listOf(DivInstruction())
-            BinaryOperationKind.Mod    -> listOf(ModInstruction())
-            BinaryOperationKind.And    -> listOf(AndInstruction())
-            BinaryOperationKind.Or     -> listOf(OrInstruction())
-            BinaryOperationKind.Lt     -> listOf(LtInstruction())
-            BinaryOperationKind.Gt     -> listOf(GtInstruction())
-            BinaryOperationKind.Eq     -> listOf(EqInstruction())
-            BinaryOperationKind.NotEq  -> listOf(EqInstruction(), NotInstruction())
-            BinaryOperationKind.Concat -> listOf(ConcatInstruction())
-        }
+    private fun lower(node: BoundBinaryExpression) = lower(node.left)
+        .add(
+            if (shouldCastToFloat(node.type, node.left.type, node.right.type, false))
+                listOf(IntToFloatInstruction())
+            else emptyList()
+        )
+        .add(lower(node.right))
+        .add(
+            if (shouldCastToFloat(node.type, node.left.type, node.right.type, true))
+                listOf(IntToFloatInstruction())
+            else
+                emptyList()
+        )
+        .add(
+            when (node.kind) {
+                BinaryOperationKind.Add    -> listOf(AddInstruction())
+                BinaryOperationKind.Sub    -> listOf(SubInstruction())
+                BinaryOperationKind.Mul    -> listOf(MulInstruction())
+                BinaryOperationKind.Div    -> listOf(DivInstruction())
+                BinaryOperationKind.Mod    -> listOf(ModInstruction())
+                BinaryOperationKind.And    -> listOf(AndInstruction())
+                BinaryOperationKind.Or     -> listOf(OrInstruction())
+                BinaryOperationKind.Lt     -> listOf(LtInstruction())
+                BinaryOperationKind.Gt     -> listOf(GtInstruction())
+                BinaryOperationKind.Eq     -> listOf(EqInstruction())
+                BinaryOperationKind.NotEq  -> listOf(EqInstruction(), NotInstruction())
+                BinaryOperationKind.Concat -> listOf(ConcatInstruction())
+            }
+        )
 
     private fun lower(node: BoundWriteStatement) = node
         .expressions
         .asReversed()
-        .flatMap { lower(it) } + listOf(PrintInstruction(node.expressions.size))
+        .flatMap { lower(it) }
+        .add(PrintInstruction(node.expressions.size))
 
     private fun lower(node: BoundDeclarationStatement) = node.declarationNames.flatMap {
         listOf(
@@ -109,12 +125,12 @@ class Lowerer {
             let {
                 val elseLabel = createLabel()
                 val endLabel = createLabel()
-                listOf(FalseJmpInstruction(elseLabel)) +
-                        lower(node.body) +
-                        JmpInstruction(endLabel) +
-                        LabelInstruction(elseLabel) +
-                        lower(node.elseBody!!) +
-                        LabelInstruction(endLabel)
+                listOf(FalseJmpInstruction(elseLabel))
+                    .add(lower(node.body))
+                    .add(JmpInstruction(endLabel))
+                    .add(LabelInstruction(elseLabel))
+                    .add(lower(node.elseBody!!))
+                    .add(LabelInstruction(endLabel))
             }
 
     private fun lower(node: BoundIfStatement) = when (node.elseBody) {
@@ -126,12 +142,12 @@ class Lowerer {
         val continueLabel = createLabel()
         val breakLabel = createLabel()
 
-        return listOf(LabelInstruction(continueLabel)) +
-                lower(node.condition) +
-                FalseJmpInstruction(breakLabel) +
-                lower(node.body) +
-                JmpInstruction(continueLabel) +
-                LabelInstruction(breakLabel)
+        return listOf(LabelInstruction(continueLabel))
+            .add(lower(node.condition))
+            .add(FalseJmpInstruction(breakLabel))
+            .add(lower(node.body))
+            .add(JmpInstruction(continueLabel))
+            .add(LabelInstruction(breakLabel))
     }
 
 
