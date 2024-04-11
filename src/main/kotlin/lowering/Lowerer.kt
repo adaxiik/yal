@@ -30,7 +30,8 @@ class Lowerer {
     private fun lower(node: BoundAssignmentExpression) =
         lower(node.expression) +
         ( if (node.type == Type.Float && node.expression.type != Type.Float) listOf(IntToFloatInstruction()) else emptyList<Instruction>()) +
-        listOf(SaveInstruction(node.name))
+        SaveInstruction(node.name) +
+        LoadInstruction(node.name)
 
     private fun lower(node: BoundExpression) : List<Instruction> = when (node) {
         is BoundLiteralExpression    -> lower(node)
@@ -53,10 +54,10 @@ class Lowerer {
         else -> false
     }
     private fun lower(node: BoundBinaryExpression) =
-        lower(node.right) +
-        ( if (shouldCastToFloat(node.type, node.left.type, node.right.type, true)) listOf(IntToFloatInstruction()) else emptyList<Instruction>()) +
         lower(node.left) +
         ( if (shouldCastToFloat(node.type, node.left.type, node.right.type, false)) listOf(IntToFloatInstruction()) else emptyList<Instruction>()) +
+        lower(node.right) +
+        ( if (shouldCastToFloat(node.type, node.left.type, node.right.type, true)) listOf(IntToFloatInstruction()) else emptyList<Instruction>()) +
         when (node.kind) {
             BinaryOperationKind.Add    -> listOf(AddInstruction())
             BinaryOperationKind.Sub    -> listOf(SubInstruction())

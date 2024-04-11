@@ -136,7 +136,7 @@ class VirtualMachine(private val instructions: List<Instruction>) {
 
     private fun interpret(ins: LoadInstruction) = valueStack.push(variables[ins.name]!!).unit
 
-    private fun interpret(ins: SaveInstruction) { variables[ins.name] = valueStack.peek()}
+    private fun interpret(ins: SaveInstruction) { variables[ins.name] = valueStack.pop()}
 
     private fun interpret(ins: LabelInstruction) : Unit = Unit
 
