@@ -19,25 +19,25 @@ else
     write "condition was false";
 
 if (true) {
-	write "inside";
-	write "second";
-	write "if";
+    write "inside";
+    write "second";
+    write "if";
 }
 
-int a,b;
+int a, b;
 
-while(a<10) {
- write "a=",a;
- a=a+1;
+while(a < 10) {
+ write "a=", a;
+ a = a + 1;
 }
 
-a=0;
+a = 0;
 
 read b;
 
-while(a<b) {
- write "a=",a,", b=",b;
- a=a+1;
+while(a < b) {
+ write "a=", a, ", b=", b;
+ a = a + 1;
 }
 ```
 
