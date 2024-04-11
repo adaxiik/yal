@@ -9,8 +9,14 @@ import kotlin.system.exitProcess
 
 
 fun main(args: Array<String>) {
+
+    val filename = when(args.size) {
+        0 -> "yal-sources/test1.yal"
+        else -> args[0]
+    }
+
     val inputStream = try {
-        CharStreams.fromFileName("yal-sources/test1.yal")
+        CharStreams.fromFileName(filename)
     } catch (e: Exception) {
         println(e)
         exitProcess(1)

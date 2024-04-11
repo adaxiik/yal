@@ -29,6 +29,10 @@ tasks.generateGrammarSource {
     arguments = listOf("-no-listener", "-visitor")
 }
 
+tasks.named<JavaExec>("run") {
+    standardInput = System.`in`
+}
+
 java {
     sourceCompatibility = JavaVersion.VERSION_11
     targetCompatibility = JavaVersion.VERSION_11
