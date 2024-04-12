@@ -25,8 +25,8 @@ class VirtualMachine(private val instructions: List<Instruction>) {
     private var instructionPointer = 0
 
     private fun interpret(ins: AddInstruction) {
-        val left = valueStack.pop()
         val right = valueStack.pop()
+        val left = valueStack.pop()
         when (left) {
             is Int -> valueStack.push(left + right as Int)
             is Float -> valueStack.push(left + right as Float)
@@ -35,8 +35,8 @@ class VirtualMachine(private val instructions: List<Instruction>) {
     }
 
     private fun interpret(ins: SubInstruction) {
-        val left = valueStack.pop()
         val right = valueStack.pop()
+        val left = valueStack.pop()
         when (left) {
             is Int -> valueStack.push(left - right as Int)
             is Float -> valueStack.push(left - right as Float)
@@ -45,8 +45,8 @@ class VirtualMachine(private val instructions: List<Instruction>) {
     }
 
     private fun interpret(ins: MulInstruction) {
-        val left = valueStack.pop()
         val right = valueStack.pop()
+        val left = valueStack.pop()
         when (left) {
             is Int -> valueStack.push(left * right as Int)
             is Float -> valueStack.push(left * right as Float)
@@ -55,8 +55,8 @@ class VirtualMachine(private val instructions: List<Instruction>) {
     }
 
     private fun interpret(ins: DivInstruction) {
-        val left = valueStack.pop()
         val right = valueStack.pop()
+        val left = valueStack.pop()
         when (left) {
             is Int -> valueStack.push(left / right as Int)
             is Float -> valueStack.push(left / right as Float)
@@ -65,33 +65,33 @@ class VirtualMachine(private val instructions: List<Instruction>) {
     }
 
     private fun interpret(ins: ModInstruction)  {
-        val left = valueStack.pop() as Int
         val right = valueStack.pop() as Int
+        val left = valueStack.pop() as Int
         valueStack.push(left % right)
     }
 
     private fun interpret(ins: ConcatInstruction)  {
-        val left = valueStack.pop() as String
         val right = valueStack.pop() as String
+        val left = valueStack.pop() as String
         valueStack.push(left + right)
     }
 
     private fun interpret(ins: AndInstruction) {
-        val left = valueStack.pop() as Boolean
         val right = valueStack.pop() as Boolean
+        val left = valueStack.pop() as Boolean
         valueStack.push(left && right)
     }
 
     private fun interpret(ins: OrInstruction) {
-        val left = valueStack.pop() as Boolean
         val right = valueStack.pop() as Boolean
+        val left = valueStack.pop() as Boolean
         valueStack.push(left || right)
     }
 
 
     private fun interpret(ins: GtInstruction) {
-        val left = valueStack.pop()
         val right = valueStack.pop()
+        val left = valueStack.pop()
         when (left) {
             is Int -> valueStack.push(left > right as Int)
             is Float -> valueStack.push(left > right as Float)
@@ -100,8 +100,8 @@ class VirtualMachine(private val instructions: List<Instruction>) {
     }
 
     private fun interpret(ins: LtInstruction) {
-        val left = valueStack.pop()
         val right = valueStack.pop()
+        val left = valueStack.pop()
         when (left) {
             is Int -> valueStack.push(left < right as Int)
             is Float -> valueStack.push(left < right as Float)
@@ -110,8 +110,8 @@ class VirtualMachine(private val instructions: List<Instruction>) {
     }
 
     private fun interpret(ins: EqInstruction) {
-        val left = valueStack.pop()
         val right = valueStack.pop()
+        val left = valueStack.pop()
         when (left) {
             is Int -> valueStack.push(left == right as Int)
             is Float -> valueStack.push(left == right as Float)
